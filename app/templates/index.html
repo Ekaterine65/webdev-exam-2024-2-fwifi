@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% from 'pagination.html' import render_pagination %}
+
+{% block content %}
+<div class="container">
+    <div class="my-5">
+        <h2 class="mb-3 text-center text-uppercase font-weight-bold">Список книг</h2>
+    </div>
+    <a class="btn btn-outline-light" href="{{ url_for('books.index') }}">Продолжить</a>
+{% endblock %}

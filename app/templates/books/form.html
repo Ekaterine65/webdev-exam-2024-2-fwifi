@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <h2 class="my-3 text-center text-uppercase font-weight-bold">
+            {% if book.id %}Редактирование книги{% else %}Добавление книги{% endif %}
+        </h2>
+
+        <form method="POST" action="{{ url_for(endpoint, book_id=book.id) }}" enctype="multipart/form-data">
+            {% import 'books/_form_macros.html' as form_macros %}
+            {{ form_macros.book_form(book, genres, is_edit) }}
+
+            <div class="mb-3 text-center">
+                <input type="submit" class="btn btn-dark" value="Сохранить">
+            </div>
+        </form>
+    </div>
+{% endblock %}

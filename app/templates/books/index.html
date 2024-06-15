@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% from 'pagination.html' import render_pagination %}
+
+{% block content %}
+<div class="container">
+    <div class="my-5">
+        <h2 class="mb-3 text-center text-uppercase font-weight-bold">Список книг</h2>
+    </div>
+
+
+    <div class="books-list container-fluid mt-3 mb-3">
+        {% for book in books %}
+        <div class="row p-3 border rounded mb-3 book-card">
+            <!-- Cover Image -->
+            <div class="col-md-3 mb-3 mb-md-0 d-flex align-items-center justify-content-center">
+                <img src="{{ book.cover.url }}" alt="{{ book.title }} Cover" class="img-fluid book-cover">
+            </div>
+
+            <!-- Book Details -->
+            <div class="col-md-9">
+                <!-- Title -->
+                <h4 class="text-uppercase">{{ book.title }}</h4>
+
+                <!-- Details -->
+                <div class="row">
+                    <!-- Column 1 -->
+                    <div class="col-md-4">
+                        <p class="text-muted my-1">Жанры: {{ book.genres | map(attribute='name') | join(', ') }}</p>
+                        <p class="my-1">Год: {{ book.year }}</p>
+                    </div>
+
+                    <!-- Column 2 -->
+                    <div class="col-md-4">
+                        <p class="ms-auto rating"><span>★</span> <span>{{ "%.2f" | format(book.rating) }}</span></p>
+                        <p class="my-1">Количество рецензий: {{ book.reviews | length }}</p>
+                    </div>
+
+                    <!-- Column 3 -->
+                    <div class="col-md-4">
+                        <!-- Buttons -->
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('books.show', book_id=book.id) }}" class="btn btn-primary mb-2">Просмотр</a>
+                            {% if current_user.is_authenticated %}
+                                {% if current_user.role.name in ['Администратор', 'Модератор'] %}
+                                    <a href="{{ url_for('books.edit', book_id=book.id) }}" class="btn btn-secondary mb-2">Редактирование</a>
+                                {% endif %}
+                                {% if current_user.role.name == 'Администратор' %}
+                                    <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ book.id }}" data-book-title="{{ book.title }}" data-book-id="{{ book.id }}">Удалить</button>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Modal -->
+        <div class="modal fade" id="deleteModal{{ book.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ book.id }}" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteModalLabel{{ book.id }}">Удаление книги</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                    </div>
+                    <div class="modal-body">
+                        Вы уверены, что хотите удалить книгу "{{ book.title }}"<span id="bookTitle{{ book.id }}"></span>?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Нет</button>
+                        <form method="POST" action="{{ url_for('books.delete', book_id=book.id) }}" class="d-inline">
+                            <input type="hidden" name="book_id" value="{{ book.id }}">
+                            <button type="submit" class="btn btn-danger">Да</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="mb-5">
+        {{ render_pagination(pagination, request.endpoint) }}
+    </div>
+
+    {% if current_user.is_authenticated and current_user.role.name == 'Администратор' %}
+        <div class="text-center my-3">
+            <a class="btn btn-lg btn-dark" href="{{ url_for('books.new') }}">Добавить книгу</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
