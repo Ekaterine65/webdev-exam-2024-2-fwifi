@@ -6,13 +6,19 @@ import os
 from tools import ImageSaver
 from config import UPLOAD_FOLDER
 from datetime import datetime
+import markdown
+import bleach
+
+def sanitize_html(text):
+    return bleach.clean(text, tags=[], attributes={}, protocols=[], strip=True)
 
 bp = Blueprint('books', __name__, url_prefix='/books')
 
 BOOK_PARAMS = ['title', 'short_desc', 'year', 'publisher', 'author', 'pages']
 
 def params():
-    return { p: request.form.get(p) or None for p in BOOK_PARAMS }
+    sanitized_params = { p: sanitize_html(request.form.get(p) or '') for p in BOOK_PARAMS }
+    return sanitized_params
 
 def get_genre_ids():
     return request.form.getlist('genre_ids')
@@ -123,10 +129,22 @@ def delete(book_id):
 def show(book_id):
     book = db.get_or_404(Book, book_id)
     current_user_review = None
+
+    book.short_desc_html = markdown.markdown(book.short_desc)
+
+    for review in book.reviews:
+        review.text_html = markdown.markdown(review.text)
+
     if current_user.is_authenticated:
         current_user_review = db.session.query(Review).filter_by(book_id=book_id, user_id=current_user.id).first()
+        current_user_review.text_html = markdown.markdown(current_user_review.text)
     return render_template('books/show.html', book=book, current_user_review=current_user_review)
 
+@bp.route('/<int:book_id>/review')
+@login_required
+def review(book_id):
+    book = db.get_or_404(Book, book_id)
+    return render_template('books/add_review.html', book=book)
 
 @bp.route('/<int:book_id>/add_review', methods=['POST'])
 @login_required

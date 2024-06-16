@@ -1,4 +1,4 @@
-from flask import Flask, render_template, send_from_directory
+from flask import Flask, render_template, send_from_directory, redirect, url_for
 from flask_migrate import Migrate
 from sqlalchemy.exc import SQLAlchemyError
 from models import db, Cover 
@@ -26,7 +26,7 @@ app.register_blueprint(books_bp)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return redirect(url_for('books.index'))
 
 @app.route('/covers/<cover_id>')
 def cover(cover_id):

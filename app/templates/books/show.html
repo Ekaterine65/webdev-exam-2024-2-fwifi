@@ -14,7 +14,7 @@
                 {% endif %}
                 <span>★</span> <span>{{ "%.2f" | format(book.rating) }}</span>
             </p>
-            <p class="lead">{{ book.short_desc }}</p>
+            <p class="lead">{{ book.short_desc_html | safe }}</p>
         </div>
     </div>
 
@@ -29,7 +29,7 @@
                     <div class="card-body">
                         <h5 class="card-title">{{ review.user.full_name }}</h5>
                         <h6 class="card-subtitle mb-2 text-muted">Оценка: {{ review.rating }}</h6>
-                        <p class="card-text">{{ review.text }}</p>
+                        <p class="card-text">{{ review.text_html | safe }}</p>
                         <p class="card-text"><small class="text-muted">Оставлено {{ review.created_at.strftime('%d.%m.%Y') }}</small></p>
                     </div>
                 </div>
@@ -39,36 +39,19 @@
         {% endif %}
 
     </section>
-
     <section class="add-review mb-5">
         {% if current_user.is_authenticated %}
             {% if not current_user_review %}
-                <h2 class="mb-3 text-center text-uppercase font-weight-bold">Добавить отзыв</h2>
-                <form action="{{ url_for('books.add_review', book_id=book.id) }}" method="POST">
-                    <div class="mb-3">
-                        <label for="rating" class="form-label">Оценка</label>
-                        <select id="rating" name="rating" class="form-select">
-                            <option value="5">Отлично</option>
-                            <option value="4">Хорошо</option>
-                            <option value="3">Удовлетворительно</option>
-                            <option value="2">Неудовлетворительно</option>
-                            <option value="1">Плохо</option>
-                            <option value="0">Ужасно</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="text" class="form-label">Текст отзыва</label>
-                        <textarea id="text" name="text" class="form-control" rows="3"></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Отправить</button>
-                </form>
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('books.review', book_id=book.id) }}" class="btn btn-primary">Написать рецензию</a>
+                </div>
             {% else %}
                 <h2 class="mb-3 text-center text-uppercase font-weight-bold">Ваш отзыв</h2>
                 <div class="card mb-3">
                     <div class="card-body">
                         <h5 class="card-title">{{ current_user_review.user.full_name }} <small class="text-muted">{{ current_user_review.created_at.strftime('%Y-%m-%d %H:%M') }}</small></h5>
                         <h6 class="card-subtitle mb-2 text-muted">Оценка: {{ current_user_review.rating }}</h6>
-                        <p class="card-text">{{ current_user_review.text }}</p>
+                        <p class="card-text">{{ current_user_review.text_html | safe }}</p>
                     </div>
                 </div>
             {% endif %}

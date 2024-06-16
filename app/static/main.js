@@ -34,3 +34,17 @@ window.onload = function() {
         course_elm.onclick = openLink;
     }
 }
+
+
+document.addEventListener("DOMContentLoaded", function() {
+    const textareas = document.querySelectorAll('textarea');
+    textareas.forEach(function(textarea) {
+        console.log("Textarea element:", textarea);
+        if (textarea) {
+            console.log("Initializing EasyMDE");
+            new EasyMDE({ element: textarea });
+        } else {
+            console.log("Textarea element not found");
+        }
+    });
+});
